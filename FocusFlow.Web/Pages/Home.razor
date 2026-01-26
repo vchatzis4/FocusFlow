@@ -1,7 +1,138 @@
-﻿@page "/"
+@page "/"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@inject IDashboardService DashboardService
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Dashboard - FocusFlow</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1 class="mb-4">Dashboard</h1>
 
-Welcome to your new app.
+@if (isLoading)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (dashboard == null)
+{
+    <div class="alert alert-warning">Unable to load dashboard data.</div>
+}
+else
+{
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Projects</h5>
+                    <h2 class="card-text">@dashboard.TotalProjects</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Tasks</h5>
+                    <h2 class="card-text">@dashboard.TotalTasks</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Completed</h5>
+                    <h2 class="card-text">@dashboard.CompletedTasks</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-danger text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Overdue</h5>
+                    <h2 class="card-text">@dashboard.OverdueTasks</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Stats -->
+    <h3 class="mb-3">Project Statistics</h3>
+
+    @if (!dashboard.ProjectStats.Any())
+    {
+        <div class="alert alert-info">
+            No projects yet. <a href="/projects">Create your first project</a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var project in dashboard.ProjectStats)
+            {
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <strong>@project.ProjectName</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6 col-md-3">
+                                    <div class="text-muted small">Total</div>
+                                    <div class="fw-bold">@project.TotalTasks</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="text-muted small">Done</div>
+                                    <div class="fw-bold text-success">@project.CompletedTasks</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="text-muted small">In Progress</div>
+                                    <div class="fw-bold text-warning">@project.InProgressTasks</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="text-muted small">Overdue</div>
+                                    <div class="fw-bold text-danger">@project.OverdueTasks</div>
+                                </div>
+                            </div>
+                            @if (project.TotalTasks > 0)
+                            {
+                                <div class="progress mt-3" style="height: 8px;">
+                                    <div class="progress-bar bg-success"
+                                         style="width: @(GetPercentage(project.CompletedTasks, project.TotalTasks))%">
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    @GetPercentage(project.CompletedTasks, project.TotalTasks)% complete
+                                </small>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+
+@code {
+    private DashboardDto? dashboard;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboard();
+    }
+
+    private async Task LoadDashboard()
+    {
+        isLoading = true;
+        dashboard = await DashboardService.GetDashboardAsync();
+        isLoading = false;
+    }
+
+    private int GetPercentage(int completed, int total)
+    {
+        if (total == 0) return 0;
+        return (int)Math.Round((double)completed / total * 100);
+    }
+}
