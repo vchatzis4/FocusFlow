@@ -12,7 +12,7 @@ namespace FocusFlow.Application
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
             services.AddValidatorsFromAssembly(assembly);
-            services.AddAutoMapper(assembly);
+            services.AddAutoMapper(cfg => cfg.AddMaps(assembly));
 
             return services;
         }

@@ -1,6 +1,7 @@
 namespace FocusFlow.Application.DTOs
 {
     public record RegisterDto(
+        string UserName,
         string Email,
         string Password,
         string? FirstName,
@@ -8,12 +9,13 @@ namespace FocusFlow.Application.DTOs
     );
 
     public record LoginDto(
-        string Email,
+        string UserName,
         string Password
     );
 
     public record AuthResponseDto(
         string UserId,
+        string UserName,
         string Email,
         string Token,
         DateTime Expiration
@@ -21,6 +23,7 @@ namespace FocusFlow.Application.DTOs
 
     public record UserDto(
         string Id,
+        string UserName,
         string Email,
         string? FirstName,
         string? LastName

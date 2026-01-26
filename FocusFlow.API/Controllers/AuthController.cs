@@ -27,15 +27,21 @@ namespace FocusFlow.API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterDto request)
         {
-            var existingUser = await _userManager.FindByEmailAsync(request.Email);
-            if (existingUser != null)
+            var existingUserByEmail = await _userManager.FindByEmailAsync(request.Email);
+            if (existingUserByEmail != null)
             {
                 return BadRequest(new { message = "User with this email already exists" });
             }
 
+            var existingUserByName = await _userManager.FindByNameAsync(request.UserName);
+            if (existingUserByName != null)
+            {
+                return BadRequest(new { message = "User with this username already exists" });
+            }
+
             var user = new ApplicationUser
             {
-                UserName = request.Email,
+                UserName = request.UserName,
                 Email = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
@@ -51,6 +57,7 @@ namespace FocusFlow.API.Controllers
             var token = _jwtService.GenerateToken(user);
             var response = new AuthResponseDto(
                 user.Id,
+                user.UserName,
                 user.Email!,
                 token,
                 _jwtService.GetExpiration()
@@ -62,21 +69,22 @@ namespace FocusFlow.API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginDto request)
         {
-            var user = await _userManager.FindByEmailAsync(request.Email);
+            var user = await _userManager.FindByNameAsync(request.UserName);
             if (user == null)
             {
-                return Unauthorized(new { message = "Invalid email or password" });
+                return Unauthorized(new { message = "Invalid username or password" });
             }
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: false);
             if (!result.Succeeded)
             {
-                return Unauthorized(new { message = "Invalid email or password" });
+                return Unauthorized(new { message = "Invalid username or password" });
             }
 
             var token = _jwtService.GenerateToken(user);
             var response = new AuthResponseDto(
                 user.Id,
+                user.UserName!,
                 user.Email!,
                 token,
                 _jwtService.GetExpiration()
@@ -101,7 +109,7 @@ namespace FocusFlow.API.Controllers
                 return NotFound();
             }
 
-            return Ok(new UserDto(user.Id, user.Email!, user.FirstName, user.LastName));
+            return Ok(new UserDto(user.Id, user.UserName!, user.Email!, user.FirstName, user.LastName));
         }
     }
 }
