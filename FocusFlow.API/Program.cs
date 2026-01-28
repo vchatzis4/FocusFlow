@@ -3,7 +3,9 @@ using FocusFlow.API.Configuration;
 using FocusFlow.API.Services;
 using FocusFlow.Application;
 using FocusFlow.Infrastructure;
+using FocusFlow.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -83,7 +85,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowBlazorClient", policy =>
     {
-        policy.WithOrigins("https://localhost:7139", "http://localhost:5062")
+        policy.WithOrigins(
+                "https://localhost:7139",
+                "http://localhost:5062",
+                "http://localhost:5001")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -91,8 +96,15 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+if (app.Environment.IsEnvironment("Docker"))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
+
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Docker"))
 {
     app.UseSwagger();
     app.UseSwaggerUI(options =>
@@ -101,10 +113,20 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsEnvironment("Docker"))
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("AllowBlazorClient");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+app.MapGet("/", () => new
+{
+    Status = "healthy",
+    Service = "FocusFlow API",
+    Documentation = "/swagger"
+});
 
 app.Run();
