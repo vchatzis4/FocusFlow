@@ -1,3 +1,4 @@
+using FocusFlow.API.Hubs;
 using FocusFlow.Application.DTOs;
 using FocusFlow.Application.Features.Tasks.Commands;
 using FocusFlow.Application.Features.Tasks.Queries;
@@ -5,6 +6,7 @@ using FocusFlow.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace FocusFlow.API.Controllers
 {
@@ -12,10 +14,12 @@ namespace FocusFlow.API.Controllers
     public class TasksController : ApiControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IHubContext<TaskHub> _hubContext;
 
-        public TasksController(IMediator mediator)
+        public TasksController(IMediator mediator, IHubContext<TaskHub> hubContext)
         {
             _mediator = mediator;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
@@ -69,6 +73,8 @@ namespace FocusFlow.API.Controllers
                 return BadRequest(new { message = "Failed to create task. Project not found or access denied." });
             }
 
+            await _hubContext.Clients.Group(task.ProjectId.ToString()).SendAsync("TaskCreated", task);
+
             return CreatedAtAction(nameof(GetById), new { id = task.Id }, task);
         }
 
@@ -93,12 +99,20 @@ namespace FocusFlow.API.Controllers
                 return NotFound();
             }
 
+            await _hubContext.Clients.Group(task.ProjectId.ToString()).SendAsync("TaskUpdated", task);
+
             return Ok(task);
         }
 
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
+            var task = await _mediator.Send(new GetTaskByIdQuery(id, GetUserId()));
+            if (task == null)
+            {
+                return NotFound();
+            }
+
             var command = new DeleteTaskCommand(id, GetUserId());
             var result = await _mediator.Send(command);
 
@@ -106,6 +120,8 @@ namespace FocusFlow.API.Controllers
             {
                 return NotFound();
             }
+
+            await _hubContext.Clients.Group(task.ProjectId.ToString()).SendAsync("TaskDeleted", id);
 
             return NoContent();
         }

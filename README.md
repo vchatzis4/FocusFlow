@@ -113,6 +113,7 @@ The solution follows Clean Architecture with CQRS pattern:
 | JWT Authentication | Stateless auth suitable for API + SPA architecture |
 | EF Core InMemory for tests | Fast test execution without database dependency |
 | Nginx for Web container | Lightweight server for static Blazor files |
+| SignalR | Real-time task updates across browser sessions |
 
 ## Third-Party Packages
 
@@ -125,6 +126,7 @@ The solution follows Clean Architecture with CQRS pattern:
 | xUnit | Test framework |
 | Moq | Mocking for unit tests |
 | FluentAssertions | Readable test assertions |
+| SignalR | Real-time task updates |
 
 ## API Endpoints
 

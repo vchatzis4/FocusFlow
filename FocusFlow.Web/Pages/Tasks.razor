@@ -1,8 +1,11 @@
 @page "/tasks"
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.SignalR.Client
 @attribute [Authorize]
 @inject ITaskService TaskService
 @inject IProjectService ProjectService
+@inject IConfiguration Configuration
+@implements IAsyncDisposable
 
 <PageTitle>Tasks - FocusFlow</PageTitle>
 
@@ -228,6 +231,7 @@ else
     private string? errorMessage;
     private Guid? editingTaskId;
     private TaskFormModel formModel = new();
+    private HubConnection? hubConnection;
 
     // Filters
     private Guid? filterProjectId;
@@ -238,6 +242,60 @@ else
     {
         projects = (await ProjectService.GetAllAsync()).ToList();
         await LoadTasks();
+        await InitializeSignalR();
+    }
+
+    private async Task InitializeSignalR()
+    {
+        var apiUrl = Configuration["ApiBaseUrl"] ?? "http://localhost:5000";
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl($"{apiUrl}/hubs/tasks")
+            .WithAutomaticReconnect()
+            .Build();
+
+        hubConnection.On<TaskItemDto>("TaskCreated", async (task) =>
+        {
+            if (filterProjectId == null || task.ProjectId == filterProjectId)
+            {
+                tasks.Add(task);
+                await InvokeAsync(StateHasChanged);
+            }
+        });
+
+        hubConnection.On<TaskItemDto>("TaskUpdated", async (task) =>
+        {
+            var index = tasks.FindIndex(t => t.Id == task.Id);
+            if (index >= 0)
+            {
+                tasks[index] = task;
+                await InvokeAsync(StateHasChanged);
+            }
+        });
+
+        hubConnection.On<Guid>("TaskDeleted", async (taskId) =>
+        {
+            var task = tasks.FirstOrDefault(t => t.Id == taskId);
+            if (task != null)
+            {
+                tasks.Remove(task);
+                await InvokeAsync(StateHasChanged);
+            }
+        });
+
+        await hubConnection.StartAsync();
+
+        foreach (var project in projects)
+        {
+            await hubConnection.InvokeAsync("JoinProject", project.Id.ToString());
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
     }
 
     private async Task LoadTasks()
