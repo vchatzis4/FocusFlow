@@ -5,114 +5,375 @@
 
 <PageTitle>Dashboard - FocusFlow</PageTitle>
 
-<h1 class="mb-4">Dashboard</h1>
+<div class="dashboard">
+    <header class="dashboard-header">
+        <div>
+            <h1 class="dashboard-title">Dashboard</h1>
+            <p class="dashboard-subtitle">Your productivity overview</p>
+        </div>
+    </header>
 
-@if (isLoading)
-{
-    <div class="d-flex justify-content-center">
-        <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    </div>
-}
-else if (dashboard == null)
-{
-    <div class="alert alert-warning">Unable to load dashboard data.</div>
-}
-else
-{
-    <!-- Summary Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card bg-primary text-white h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Total Projects</h5>
-                    <h2 class="card-text">@dashboard.TotalProjects</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card bg-info text-white h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Total Tasks</h5>
-                    <h2 class="card-text">@dashboard.TotalTasks</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card bg-success text-white h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Completed</h5>
-                    <h2 class="card-text">@dashboard.CompletedTasks</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card bg-danger text-white h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Overdue</h5>
-                    <h2 class="card-text">@dashboard.OverdueTasks</h2>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Project Stats -->
-    <h3 class="mb-3">Project Statistics</h3>
-
-    @if (!dashboard.ProjectStats.Any())
+    @if (isLoading)
     {
-        <div class="alert alert-info">
-            No projects yet. <a href="/projects">Create your first project</a>
+        <div class="loading-state">
+            <div class="spinner-border"></div>
+            <span>Loading your dashboard...</span>
         </div>
+    }
+    else if (dashboard == null)
+    {
+        <div class="alert alert-warning">Unable to load dashboard data.</div>
     }
     else
     {
-        <div class="row">
-            @foreach (var project in dashboard.ProjectStats)
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card stat-projects">
+                <div class="stat-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-label">Total Projects</span>
+                    <span class="stat-value">@dashboard.TotalProjects</span>
+                </div>
+            </div>
+
+            <div class="stat-card stat-tasks">
+                <div class="stat-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-label">Total Tasks</span>
+                    <span class="stat-value">@dashboard.TotalTasks</span>
+                </div>
+            </div>
+
+            <div class="stat-card stat-completed">
+                <div class="stat-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-label">Completed</span>
+                    <span class="stat-value">@dashboard.CompletedTasks</span>
+                </div>
+            </div>
+
+            <div class="stat-card stat-overdue">
+                <div class="stat-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-label">Overdue</span>
+                    <span class="stat-value">@dashboard.OverdueTasks</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Statistics -->
+        <section class="projects-section">
+            <h2 class="section-title">Project Statistics</h2>
+
+            @if (!dashboard.ProjectStats.Any())
             {
-                <div class="col-md-6 col-lg-4 mb-3">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <strong>@project.ProjectName</strong>
-                        </div>
-                        <div class="card-body">
-                            <div class="row text-center">
-                                <div class="col-6 col-md-3">
-                                    <div class="text-muted small">Total</div>
-                                    <div class="fw-bold">@project.TotalTasks</div>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <div class="text-muted small">Done</div>
-                                    <div class="fw-bold text-success">@project.CompletedTasks</div>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <div class="text-muted small">In Progress</div>
-                                    <div class="fw-bold text-warning">@project.InProgressTasks</div>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <div class="text-muted small">Overdue</div>
-                                    <div class="fw-bold text-danger">@project.OverdueTasks</div>
-                                </div>
-                            </div>
-                            @if (project.TotalTasks > 0)
-                            {
-                                <div class="progress mt-3" style="height: 8px;">
-                                    <div class="progress-bar bg-success"
-                                         style="width: @(GetPercentage(project.CompletedTasks, project.TotalTasks))%">
-                                    </div>
-                                </div>
-                                <small class="text-muted">
-                                    @GetPercentage(project.CompletedTasks, project.TotalTasks)% complete
-                                </small>
-                            }
-                        </div>
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                        </svg>
                     </div>
+                    <h3>No projects yet</h3>
+                    <p>Create your first project to start tracking your work</p>
+                    <a href="/projects" class="btn btn-primary">Create Project</a>
                 </div>
             }
-        </div>
+            else
+            {
+                <div class="projects-grid">
+                    @foreach (var project in dashboard.ProjectStats)
+                    {
+                        <div class="project-card">
+                            <div class="project-header">
+                                <h3 class="project-name">@project.ProjectName</h3>
+                                @if (project.TotalTasks > 0)
+                                {
+                                    <span class="project-percentage">@GetPercentage(project.CompletedTasks, project.TotalTasks)%</span>
+                                }
+                            </div>
+
+                            @if (project.TotalTasks > 0)
+                            {
+                                <div class="project-progress">
+                                    <div class="progress-bar" style="width: @GetPercentage(project.CompletedTasks, project.TotalTasks)%"></div>
+                                </div>
+                            }
+
+                            <div class="project-stats">
+                                <div class="project-stat">
+                                    <span class="project-stat-value">@project.TotalTasks</span>
+                                    <span class="project-stat-label">Total</span>
+                                </div>
+                                <div class="project-stat project-stat-success">
+                                    <span class="project-stat-value">@project.CompletedTasks</span>
+                                    <span class="project-stat-label">Done</span>
+                                </div>
+                                <div class="project-stat project-stat-warning">
+                                    <span class="project-stat-value">@project.InProgressTasks</span>
+                                    <span class="project-stat-label">In Progress</span>
+                                </div>
+                                @if (project.OverdueTasks > 0)
+                                {
+                                    <div class="project-stat project-stat-danger">
+                                        <span class="project-stat-value">@project.OverdueTasks</span>
+                                        <span class="project-stat-label">Overdue</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
     }
-}
+</div>
+
+<style>
+    .dashboard {
+        max-width: 1200px;
+    }
+
+    .dashboard-header {
+        margin-bottom: 2rem;
+    }
+
+    .dashboard-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #F5F5F4;
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+
+    .dashboard-subtitle {
+        font-size: 0.9375rem;
+        color: #78716C;
+        margin: 0.375rem 0 0;
+    }
+
+    .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem;
+        gap: 1rem;
+        color: #78716C;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+        background: rgba(41, 37, 36, 0.6);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        transition: all 200ms ease;
+    }
+
+    .stat-card:hover {
+        border-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .stat-projects .stat-icon { background: rgba(245, 158, 11, 0.15); color: #FBBF24; }
+    .stat-tasks .stat-icon { background: rgba(59, 130, 246, 0.15); color: #60A5FA; }
+    .stat-completed .stat-icon { background: rgba(34, 197, 94, 0.15); color: #4ADE80; }
+    .stat-overdue .stat-icon { background: rgba(239, 68, 68, 0.15); color: #F87171; }
+
+    .stat-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.8125rem;
+        color: #78716C;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #F5F5F4;
+        line-height: 1.2;
+    }
+
+    .projects-section {
+        margin-top: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #F5F5F4;
+        margin: 0 0 1.25rem;
+    }
+
+    .empty-state {
+        background: rgba(41, 37, 36, 0.4);
+        border: 1px dashed rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 3rem;
+        text-align: center;
+    }
+
+    .empty-icon {
+        color: #57534E;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #A8A29E;
+        margin: 0 0 0.5rem;
+    }
+
+    .empty-state p {
+        font-size: 0.9375rem;
+        color: #78716C;
+        margin: 0 0 1.5rem;
+    }
+
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .project-card {
+        background: rgba(41, 37, 36, 0.6);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: all 200ms ease;
+    }
+
+    .project-card:hover {
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .project-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .project-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #F5F5F4;
+        margin: 0;
+    }
+
+    .project-percentage {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #4ADE80;
+    }
+
+    .project-progress {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 100px;
+        overflow: hidden;
+        margin-bottom: 1.25rem;
+    }
+
+    .project-progress .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #22C55E 0%, #4ADE80 100%);
+        border-radius: 100px;
+        transition: width 300ms ease;
+    }
+
+    .project-stats {
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .project-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+    }
+
+    .project-stat-value {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #F5F5F4;
+    }
+
+    .project-stat-label {
+        font-size: 0.75rem;
+        color: #78716C;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .project-stat-success .project-stat-value { color: #4ADE80; }
+    .project-stat-warning .project-stat-value { color: #FBBF24; }
+    .project-stat-danger .project-stat-value { color: #F87171; }
+
+    @@media (max-width: 1024px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stat-card {
+            padding: 1.25rem;
+        }
+
+        .projects-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
 
 @code {
     private DashboardDto? dashboard;

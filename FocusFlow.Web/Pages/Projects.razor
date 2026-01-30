@@ -59,8 +59,11 @@ else
                             @if (project.TotalTasks > 0)
                             {
                                 var pct = GetPercentage(project.CompletedTasks, project.TotalTasks);
-                                <div class="progress" style="height: 20px; min-width: 100px;">
-                                    <div class="progress-bar bg-success" style="width: @pct%">@pct%</div>
+                                <div class="progress-wrapper">
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: @pct%"></div>
+                                    </div>
+                                    <span class="progress-text">@pct%</span>
                                 </div>
                             }
                             else
@@ -128,6 +131,37 @@ else
         </div>
     </div>
 }
+
+<style>
+    .progress-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 120px;
+    }
+
+    .progress-wrapper .progress {
+        flex: 1;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 100px;
+        overflow: hidden;
+    }
+
+    .progress-wrapper .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #22C55E 0%, #4ADE80 100%);
+        border-radius: 100px;
+        transition: width 300ms ease;
+    }
+
+    .progress-text {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #4ADE80;
+        min-width: 36px;
+    }
+</style>
 
 @code {
     private List<ProjectDto> projects = new();

@@ -4,27 +4,41 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FocusFlow.Web</title>
+    <title>FocusFlow</title>
     <base href="/" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link href="FocusFlow.Web.styles.css" rel="stylesheet" />
 </head>
 
 <body>
     <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
+        <div class="loading-screen">
+            <div class="loading-logo">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                    <rect x="4" y="4" width="40" height="40" rx="12" fill="#F59E0B"/>
+                    <circle cx="24" cy="24" r="4" fill="#1C1917"/>
+                    <circle cx="24" cy="24" r="9" stroke="#1C1917" stroke-width="2.5" fill="none"/>
+                    <path d="M24 8V13M24 35V40M8 24H13M35 24H40" stroke="#1C1917" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Loading FocusFlow...</p>
+        </div>
     </div>
 
     <div id="blazor-error-ui">
+        <span class="error-icon">⚠</span>
         An unhandled error has occurred.
         <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
+        <a class="dismiss">×</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
 </body>
