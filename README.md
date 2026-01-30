@@ -65,31 +65,61 @@ Connect using SQL Server Management Studio or Azure Data Studio:
 
 The solution follows Clean Architecture with CQRS pattern:
 
+```mermaid
+graph TB
+    subgraph Presentation
+        Web[FocusFlow.Web<br/>Blazor WebAssembly]
+    end
+
+    subgraph API Layer
+        API[FocusFlow.API<br/>ASP.NET Core Controllers<br/>SignalR Hub]
+    end
+
+    subgraph Business Logic
+        App[FocusFlow.Application<br/>Commands, Queries, DTOs<br/>MediatR Handlers]
+    end
+
+    subgraph Data Access
+        Infra[FocusFlow.Infrastructure<br/>EF Core, Repositories<br/>Unit of Work, Identity]
+    end
+
+    subgraph Core
+        Domain[FocusFlow.Domain<br/>Entities, Enums]
+    end
+
+    Web -->|HTTP/REST| API
+    Web -.->|SignalR| API
+    API -->|MediatR| App
+    App --> Infra
+    Infra --> Domain
+    App --> Domain
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    FocusFlow.Web                            │
-│                  (Blazor WebAssembly)                       │
-└──────────────────────────┬──────────────────────────────────┘
-                           │ HTTP/REST
-┌──────────────────────────▼──────────────────────────────────┐
-│                    FocusFlow.API                            │
-│              (ASP.NET Core Controllers)                     │
-└──────────────────────────┬──────────────────────────────────┘
-                           │ MediatR
-┌──────────────────────────▼──────────────────────────────────┐
-│                 FocusFlow.Application                       │
-│            (Commands, Queries, DTOs, Interfaces)            │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-┌──────────────────────────▼──────────────────────────────────┐
-│                FocusFlow.Infrastructure                     │
-│         (EF Core, Repositories, Identity)                   │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-┌──────────────────────────▼──────────────────────────────────┐
-│                   FocusFlow.Domain                          │
-│                (Entities, Enums)                            │
-└─────────────────────────────────────────────────────────────┘
+
+### Request Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant B as Blazor Web
+    participant A as API Controller
+    participant M as MediatR
+    participant H as Handler
+    participant R as Repository
+    participant D as Database
+
+    U->>B: Action (e.g., Create Task)
+    B->>A: HTTP Request + JWT
+    A->>M: Send Command/Query
+    M->>H: Route to Handler
+    H->>R: Data Operation
+    R->>D: EF Core Query
+    D-->>R: Result
+    R-->>H: Entity/DTO
+    H-->>M: Response
+    M-->>A: Result
+    A-->>B: HTTP Response
+    A--)B: SignalR Notification
+    B-->>U: Updated UI
 ```
 
 ### Project Structure
