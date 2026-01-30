@@ -14,4 +14,5 @@ RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
 FROM nginx:alpine AS final
 COPY --from=publish /app/publish/wwwroot /usr/share/nginx/html
 COPY FocusFlow.Web/nginx.conf /etc/nginx/nginx.conf
+COPY FocusFlow.Web/wwwroot/appsettings.Docker.json /usr/share/nginx/html/appsettings.json
 EXPOSE 80

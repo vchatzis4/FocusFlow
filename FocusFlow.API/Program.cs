@@ -89,8 +89,11 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 "https://localhost:7139",
+                "http://localhost:7139",
                 "http://localhost:5062",
-                "http://localhost:5001")
+                "http://localhost:5001",
+                "https://localhost:5001",
+                "http://localhost:5000")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -131,6 +134,6 @@ app.MapGet("/", () => new
     Status = "healthy",
     Service = "FocusFlow API",
     Documentation = "/swagger"
-});
+}).ExcludeFromDescription();
 
 app.Run();
