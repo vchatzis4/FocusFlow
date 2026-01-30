@@ -12,37 +12,50 @@ A task management application built with .NET 8, Blazor WebAssembly, and Entity 
 
 ### Using Docker (Recommended)
 
+No configuration needed. Just run:
+
 ```bash
-docker compose up -d
+docker-compose up --build
 ```
 
 This starts:
 - **Web App**: http://localhost:5001
 - **API**: http://localhost:5000
 - **Swagger**: http://localhost:5000/swagger
-- **SQL Server**: localhost,1433
+- **SQL Server**: localhost:1433
+
+The database is automatically created and migrated on first run.
 
 To stop:
 ```bash
-docker compose down
+docker-compose down
+```
+
+To rebuild after code changes:
+```bash
+docker-compose build --no-cache
+docker-compose up
 ```
 
 ### Local Development
 
-1. Update the connection string in `FocusFlow.API/appsettings.json` if needed
+Requires SQL Server LocalDB or a SQL Server instance.
 
-2. Run the API:
+1. Run the API:
 ```bash
-dotnet run --project FocusFlow.API
+cd FocusFlow.API
+dotnet run
 ```
 
-3. Run the Web app (in a separate terminal):
+2. Run the Web app (in a separate terminal):
 ```bash
-dotnet run --project FocusFlow.Web
+cd FocusFlow.Web
+dotnet run
 ```
 
-- API: https://localhost:7002
-- Web: https://localhost:7139
+- **API**: https://localhost:7002
+- **Web**: https://localhost:7139
+- **Swagger**: https://localhost:7002/swagger
 
 ## Running Tests
 
